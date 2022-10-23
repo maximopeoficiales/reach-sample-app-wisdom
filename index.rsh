@@ -11,6 +11,7 @@ const sellerInteract = {
 };
 const buyerInteract = {
   ...commonInteract,
+  confirmPurchase: Fun([UInt], Bool)
 };
 
 // crea una instancia para iniciar una aplicacion standard
@@ -30,6 +31,15 @@ export const main = Reach.App(() => {
   // ejecuta la funcion de sellerInteract =>  reportReady de index.mjs y le pasa el parametro
   SELLER.interact.reportReady(price);
   commit();
+
+  // interactua con el precio de la transaccion del  y ejecuta la funcion de confirmacion
+  BUYER.only(() => { const willBuy = declassify(interact.confirmPurchase(price)); });
+  BUYER.publish(willBuy);
+  if (!willBuy) {
+    commit();
+  } else {
+    commit();
+  }
 
   exit();
 });
