@@ -1,7 +1,13 @@
 'reach 0.1';
 const commonInteract = {};
+
+// se le indica el contracto que realizara el seller 
 const sellerInteract = {
   ...commonInteract,
+  // Sera entero
+  price: UInt,
+  // sera una funcion que recibira un parametro de tipo entero y no devolvera nada
+  reportReady: Fun([UInt], Null),
 };
 const buyerInteract = {
   ...commonInteract,
@@ -14,8 +20,16 @@ export const main = Reach.App(() => {
   seller => vendedor
   buyer => comprador
   */
-  const S = Participant('Seller', sellerInteract);
-  const B = Participant('Buyer', buyerInteract);
+  const SELLER = Participant('Seller', sellerInteract);
+  const BUYER = Participant('Buyer', buyerInteract);
+
   init();
+  // obtiene y setea el precio de la transaccion
+  SELLER.only(() => { const price = declassify(interact.price); });
+  SELLER.publish(price);
+  // ejecuta la funcion de sellerInteract =>  reportReady de index.mjs y le pasa el parametro
+  SELLER.interact.reportReady(price);
+  commit();
+
   exit();
 });

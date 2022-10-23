@@ -37,7 +37,7 @@ const toStandarUnit = (atomicUnit) => stdlib.formatCurrency(atomicUnit, 4);
 
 const showBalance = async (acc) => {
   const standarUnitBalance = toStandarUnit(await stdlib.balanceOf(acc))
-  console.log(`Your balance is ${standarUnitBalance} ${standarUnitStr}.`);
+  console.log(`Tu balance actual es: ${standarUnitBalance} ${standarUnitStr}.`);
 }
 
 
@@ -46,20 +46,26 @@ const commonInteract = {};
 
 if (role === 'seller') {
   console.log("🛍 seller 🛍");
-  
+  // se le agrega la interaccion que tendra el seller
   const sellerInteract = {
     ...commonInteract,
+    price: toAtomicUnit(5),
+    reportReady: async (price) => {
+      console.log(`Tu sabiduría está a la venta en ${toStandarUnit(price)} ${standarUnitStr}.`);
+      console.log(`Informacion del contrato: ${JSON.stringify(await ctc.getInfo())}`);
+    },
   };
+
   // crea una cuenta al seller con 1000 ALGOS
   const acc = await stdlib.newTestAccount(stdlib.parseCurrency(1000));
   // obtengo una referencia al contracto
   const ctc = acc.contract(backend);
   // muestro el balance antes de ejecutar el contracto
-  await showBalance(acc);
+  await showBalance(acc); //mostrara 1000 ALGO
   // se inicia una interaccion con el contrato del seller
   await ctc.participants.Seller(sellerInteract);
   // muestro el balance actual del seller despues del contracto
-  await showBalance(acc);
+  await showBalance(acc); // mostrara 999.996 ALGO
 } else {
   // Buyer
   console.log("👨 Buyer 👨");
