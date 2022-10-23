@@ -1,3 +1,4 @@
+'use strict';
 import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 // definicion de rol principal obteniendolo de las los argumentos por consola
@@ -15,10 +16,37 @@ const stdlib = loadStdlib(process.env);
 console.log(`The consensus network is ${stdlib.connector}.`);
 
 
+const standarUnitStr = stdlib.standardUnit;
+const atomicUnitStr = stdlib.atomicUnit;
+console.log(`La unidad estándar es ${standarUnitStr} `);
+console.log(`La unidad atómica es ${atomicUnitStr} `);
+
+// Convierte el Standar Unit a  Atomic Unit
+const toAtomicUnit = (standarUnit) => stdlib.parseCurrency(standarUnit);
+
+// Convierte el  Atomic Unit a  Standar Unit
+const toStandarUnit = (atomicUnit) => stdlib.formatCurrency(atomicUnit, 4);
+
+// Standar Unit Balance
+// const standarBalance = 1000;
+// console.log(`El balance es: ${standarBalance} ${standarUnitStr}`);
+
+// const atomicBalance = toAtomicUnit(standarBalance);
+// console.log(`El balance atomico es: ${atomicBalance} ${atomicUnitStr}`);
+// console.log(`El balance standard es: ${toStandarUnit(atomicBalance)} ${standarUnitStr}`);
+
+const showBalance = async (acc) => {
+  const standarUnitBalance = toStandarUnit(await stdlib.balanceOf(acc))
+  console.log(`Your balance is ${standarUnitBalance} ${standarUnitStr}.`);
+}
+
+
+
 const commonInteract = {};
 
 if (role === 'seller') {
-  console.log("soy un seller!!");
+  console.log("🛍 seller 🛍");
+  
   const sellerInteract = {
     ...commonInteract,
   };
@@ -26,11 +54,16 @@ if (role === 'seller') {
   const acc = await stdlib.newTestAccount(stdlib.parseCurrency(1000));
   // obtengo una referencia al contracto
   const ctc = acc.contract(backend);
+  // muestro el balance antes de ejecutar el contracto
+  await showBalance(acc);
   // se inicia una interaccion con el contrato del seller
   await ctc.participants.Seller(sellerInteract);
-
+  // muestro el balance actual del seller despues del contracto
+  await showBalance(acc);
 } else {
   // Buyer
+  console.log("👨 Buyer 👨");
+
   const buyerInteract = {
     ...commonInteract,
   };
