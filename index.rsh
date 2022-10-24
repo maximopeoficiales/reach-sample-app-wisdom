@@ -1,11 +1,18 @@
 'reach 0.1';
-const commonInteract = {};
+const commonInteract = {
+  reportCancellation: Fun([], Null),
+  reportPayment: Fun([UInt], Null),
+  reportWisdom: Fun([Bytes(128)], Null),
+  reportTransfer: Fun([UInt], Null)
+
+};
 
 // se le indica el contracto que realizara el seller 
 const sellerInteract = {
   ...commonInteract,
   // Sera entero
   price: UInt,
+  wisdom: Bytes(128),
   // sera una funcion que recibira un parametro de tipo entero y no devolvera nada
   reportReady: Fun([UInt], Null),
 };
@@ -37,9 +44,24 @@ export const main = Reach.App(() => {
   BUYER.publish(willBuy);
   if (!willBuy) {
     commit();
+    each([SELLER, BUYER], () => interact.reportCancellation());
+    exit();
   } else {
     commit();
   }
+  // el comprador paga el precio
+  BUYER.pay(price);
+  // notifica a los participantes sobre el pago
+  each([SELLER, BUYER], () => interact.reportPayment(price));
+  commit();
+  // dispone la sabidurita el seller al comprador
+  SELLER.only(() => { const wisdom = declassify(interact.wisdom); });
+  SELLER.publish(wisdom);
+  // transfiere los fondos
+  transfer(price).to(SELLER);
+  commit();
+  // notifica a los participantes sobre la transferencia ejecutada
+  each([SELLER, BUYER], () => interact.reportTransfer(price));
 
   exit();
 });

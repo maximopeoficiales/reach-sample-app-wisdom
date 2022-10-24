@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 import { ask } from '@reach-sh/stdlib';
@@ -16,7 +16,7 @@ const stdlib = loadStdlib(process.env);
 // const stdlib = loadStdlib('fb449c94');
 console.log(`The consensus network is ${stdlib.connector}.`);
 
-
+const getRoleMsg = role == 'buyer' ? '🛍 El Vendedor' : '👨 El comprador ';
 const standarUnitStr = stdlib.standardUnit;
 const atomicUnitStr = stdlib.atomicUnit;
 console.log(`La unidad estándar es ${standarUnitStr} `);
@@ -44,8 +44,14 @@ const showBalance = async (acc) => {
 }
 
 
+const commonInteract = {
+  reportCancellation: () => { console.log(`${getRoleMsg} a cancelado la orden.`); },
+  reportPayment: (payment) => { console.log(`${getRoleMsg} pago ${toStandarUnit(payment)} ${standarUnitStr} al contrato 📚 .`) },
+  reportWisdom: (wisdom) => console.log(`tu nueva sabidura es: "${wisdom}"`),
+  reportTransfer: (payment) => { console.log(`El contrato fue pagado con ${toStandarUnit(payment)} ${standarUnitStr} a ${getRoleMsg}.`) }
 
-const commonInteract = {};
+
+};
 
 if (role === 'seller') {
   console.log("🛍 seller 🛍");
@@ -53,6 +59,12 @@ if (role === 'seller') {
   const sellerInteract = {
     ...commonInteract,
     price: toAtomicUnit(5),
+    // valor a tokenizar
+    wisdom: await ask.ask('Ingrese una frase sabia, o presione Entrar por defecto:', (s) => {
+      let w = !s ? 'Construir comunidades saludables.' : s;
+      if (!s) { console.log(w); }
+      return w;
+    }),
     reportReady: async (price) => {
       console.log(`Tu sabiduría está a la venta en ${toStandarUnit(price)} ${standarUnitStr}.`);
       console.log(`Informacion del contrato: ${JSON.stringify(await ctc.getInfo())}`);
